@@ -24,7 +24,7 @@ function parseArgToOpt(rawArgs) {
         generate: args['--generate'],
         validate: args['--validate'],
         langauge: args['--langauge'],
-        output: args['--output'] || path.dirname(args['--generate'])
+        output: args['--output'] || args['--generate'],
     }
 }
 export function cli(args) {
@@ -37,7 +37,9 @@ export function cli(args) {
                 console.log(`Loading models from directory...`);
                 fs.readdir(input_path, (err, files) => {
                     files.forEach(file => {
-                        validateModelFile(input_path + '/' + file);
+                        if (path.parse(file).ext.toLowerCase() == '.json') {
+                            validateModelFile(input_path + '/' + file);
+                        }
                     });
                 });
             } else {
@@ -57,11 +59,13 @@ export function cli(args) {
                     console.log(`Loading models from directory...`);
                     fs.readdir(input_path, (err, files) => {
                         files.forEach(file => {
-                            generateModelFile(input_path + '/' + file, options.output, lang);
+                            if (path.parse(file).ext.toLowerCase() == '.json') {
+                                generateModelFile(input_path + '/' + file, options.output, lang);
+                            }
                         });
                     });
                 } else {
-                    generateModelFile(input_path, options.output, lang);
+                    generateModelFile(input_path, path.dirname(options.output), lang);
                 }
             } else {
                 console.log(`file or directory is not exist: ${input_path}`)
@@ -101,6 +105,7 @@ function generateModelFile(input_path, output_path, lang) {
             console.log(asml.errors);
             return false;
         } else {
+            console.log(`Validated the model: ${path.basename(input_path)}`);
             console.log(`Generating the interface: ${path.basename(input_path)}`);
             const input_pascal_case = toPascalCase(path.parse(input_path).name);
             const { lines: model } = await quicktypeJSONSchema(lang, input_pascal_case, data);
@@ -109,39 +114,16 @@ function generateModelFile(input_path, output_path, lang) {
                 if (err) {
                     return console.log(err);
                 }
-                console.log(`Generated the interface: ${path.basename(output_filepath)}`);
+                console.log(`Generated the interface: ${output_path}/${path.basename(output_filepath)}`);
             });
             return true;
         }
     });
 }
 
-
-async function quicktypeJSON(targetLanguage, typeName, jsonString) {
-    const jsonInput = jsonInputForTargetLanguage(targetLanguage);
-
-    // We could add multiple samples for the same desired
-    // type, or many sources for other types. Here we're
-    // just making one type from one piece of sample JSON.
-    await jsonInput.addSource({
-        name: typeName,
-        samples: [jsonString],
-    });
-
-    const inputData = new InputData();
-    inputData.addInput(jsonInput);
-
-    return await quicktype({
-        inputData,
-        lang: targetLanguage,
-    });
-}
-
 async function quicktypeJSONSchema(targetLanguage, typeName, jsonSchemaString) {
     const schemaInput = new JSONSchemaInput(new JSONSchemaStore());
 
-    // We could add multiple schemas for multiple types,
-    // but here we're just making one type from JSON schema.
     await schemaInput.addSource({ name: typeName, schema: jsonSchemaString });
 
     const inputData = new InputData();
@@ -159,12 +141,12 @@ function capitalizeFirstLetter(string) {
 
 function toCamelCase(text) {
     return text.replace(/-\w/g, clearAndUpper);
-  }
+}
 
-  function toPascalCase(text) {
+function toPascalCase(text) {
     return text.replace(/(^\w|-\w)/g, clearAndUpper);
-  }
+}
 
-  function clearAndUpper(text) {
+function clearAndUpper(text) {
     return text.replace(/-/, "").toUpperCase();
-  }
+}
