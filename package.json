@@ -1,5 +1,5 @@
 {
-  "name": "asml-lang",
+  "name": "asml-cli",
   "version": "0.0.1",
   "description": "ASML CLI Tool",
   "main": "src/index.js",
