@@ -14,7 +14,7 @@
     "asml-validator": "^0.1.0",
     "esm": "^3.2.25",
     "inquirer": "^7.3.3",
-    "quicktype": "^15.0.258"
+    "quicktype-core": "^6.0.69"
   },
   "devDependencies": {},
   "scripts": {
