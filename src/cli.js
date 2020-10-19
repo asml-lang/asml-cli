@@ -105,11 +105,12 @@ function generateModelFile(input_path, output_path, lang) {
             console.log(asml.errors);
             return false;
         } else {
-            console.log(`Validated the model: ${path.basename(input_path)}`);
-            console.log(`Generating the interface: ${path.basename(input_path)}`);
             const input_pascal_case = toPascalCase(path.parse(input_path).name);
-            const { lines: model } = await quicktypeJSONSchema(lang, input_pascal_case, data);
             const output_filepath = `${output_path}/${input_pascal_case}.${langauges[lang]}`;
+            console.log(`Validated the model: ${path.basename(input_path)}`);
+            console.log(`Generating the interface: ${path.basename(output_filepath)}`);
+            const { lines: model } = await quicktypeJSONSchema(lang, input_pascal_case, data);
+
             fs.writeFile(output_filepath, model.join("\n"), function (err) {
                 if (err) {
                     return console.log(err);
