@@ -3,7 +3,7 @@
 ## install
 
 ```
-npm -g install asml-cli
+npm install -g asml-cli
 ```
 
 ## usage
